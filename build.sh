@@ -13,41 +13,6 @@
 # @author webworker01
 #
 
-log()
-{
-    local category=$1
-    local message=$2
-    local color=$3
-    local mode=$4
-
-    local datetime=$(date '+%Y-%m-%d %H:%M:%S')
-
-    case $color in
-        red)
-            colorcode=31
-            ;;
-        green)
-            colorcode=32
-            ;;
-        yellow)
-            colorcode=33
-            ;;
-        blue)
-            colorcode=34
-            ;;
-        *)
-            colorcode=32
-            ;;
-    esac
-
-    if [[ $mode != "echo" ]] && [[ ! -z $nntoolslogfile ]]; then
-        echo "${datetime} [${category}] ${message}" >> $nntoolslogfile
-    fi
-    if [[ $mode != "file" ]]; then
-        printf "\033[0;${colorcode}m${datetime} [${category}] ${message}\033[0m\n"
-    fi
-}
-
 bdb_PATH="${HOME}/berkeleydb48"
 
 gccversion=$(gcc --version | head -1 | awk '{print $4}' | cut -d"." -f1)
@@ -55,7 +20,7 @@ gccversion=$(gcc --version | head -1 | awk '{print $4}' | cut -d"." -f1)
 # Functions
 berkeleydb48 () {
     if [[ ! -f "${bdb_PATH}/include/db_cxx.h" || ! -f "${bdb_PATH}/lib/libdb_cxx-4.8.a" ]]; then
-        log "build" "installing BerkeleyDB48"
+        echo "build" "installing BerkeleyDB48"
         sleep 100
         cd $HOME
         mkdir -p $bdb_PATH
@@ -72,7 +37,7 @@ berkeleydb48 () {
         rm db-4.8.30.NC.tar.gz
         rm -rf db-4.8.30.NC
     else
-        log "build" "BerkeleyDB 4.8 detected in ${bdb_PATH}"
+        echo "build" "BerkeleyDB 4.8 detected in ${bdb_PATH}"
     fi
 }
 
@@ -83,11 +48,11 @@ boost165 () {
         boostversion=$(./boost | sed 's/_/./g')
         rm boost
     else
-        log "build" "error building boost check" "red"
+        echo "build" "error building boost check" "red"
     fi
 
     if (( $(echo "${boostversion-999} > 1.71" | bc -l) )); then
-        log "build" "installing Boost 1_65_1"
+        echo "build" "installing Boost 1_65_1"
         sleep 100
         #remove apt installed versions
         sudo apt-get -y --purge remove libboost-all-dev libboost-doc libboost-dev libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
@@ -112,7 +77,7 @@ boost165 () {
         rm boost_1_65_1.tar.gz
         rm -rf boost_1_65_1
     else
-        log "build" "Valid Boost Version Installed: ${boostversion}"
+        echo "build" "Valid Boost Version Installed: ${boostversion}"
     fi
 }
 
@@ -125,15 +90,14 @@ buildBitcoinBased () {
     if (( gccversion > 9 )) && [[ "${buildflags}" == "gcc9" ]]; then
         # install g++ 7 compiler for chips for now
         gccflags="CC=gcc-9 CXX=g++-9"
-        log "build" "using g++9"
+        echo "build" "using g++9"
     fi
 
     ./configure LDFLAGS="-L${bdb_PATH}/lib/" CPPFLAGS="-I${bdb_PATH}/include/" ${gccflags-} --with-gui=no --disable-tests --disable-bench --without-miniupnpc --enable-experimental-asm --enable-static --disable-shared
-
     make
 }
 
-log "build" "${coinname} - bitcoin based build"
+echo "build" "${coinname} - bitcoin based build"
 
 berkeleydb48
 boost165
