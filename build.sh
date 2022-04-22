@@ -57,6 +57,7 @@ gccversion=$(gcc --version | head -1 | awk '{print $4}' | cut -d"." -f1)
 berkeleydb48 () {
     if [[ ! -f "${bdb_PATH}/include/db_cxx.h" || ! -f "${bdb_PATH}/lib/libdb_cxx-4.8.a" ]]; then
         log "build" "installing BerkeleyDB48"
+        sleep 100
         cd $HOME
         mkdir -p $bdb_PATH
         wget -N 'http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz'
@@ -98,7 +99,7 @@ EOL
 
 boost165 () {
     #check if boost <= 1.71 already installed
-    cd $scriptpath/c
+    cd $HOME/c
     if make boost; then
         boostversion=$(./boost | sed 's/_/./g')
         rm boost
@@ -108,7 +109,7 @@ boost165 () {
 
     if (( $(echo "${boostversion-999} > 1.71" | bc -l) )); then
         log "build" "installing Boost 1_65_1"
-
+        sleep 100
         #remove apt installed versions
         sudo apt-get -y --purge remove libboost-all-dev libboost-doc libboost-dev libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
         sudo apt autoremove
@@ -155,6 +156,6 @@ buildBitcoinBased () {
 
 log "build" "${coinname} - bitcoin based build"
 
-#berkeleydb48
-#boost165
+berkeleydb48
+boost165
 buildBitcoinBased
